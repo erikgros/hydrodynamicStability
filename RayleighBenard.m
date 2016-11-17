@@ -8,6 +8,14 @@ z=[dz:dz:N*dz]; % z-coordinate
 % assembling matrices:
 I=eye(N);
 Z=zeros(N);
+D1=zeros(N);
+for ii=1:N-1
+ D1(ii,ii+1) =  1;
+ D1(ii+1,ii) = -1;
+end
+% using back/forward differences at boundaries:
+D1(1,1)=-2;D1(1,2)=2;D1(N,N)=2;D1(N,N-1)=-2;
+D1=D1/(2*dz);
 D2=-2*eye(N);
 for ii=1:N-1
  D2(ii,ii+1) = 1;
@@ -59,47 +67,48 @@ for it=1:6
     tx(ik)  = sorted( length(sorted) ); % max eigenvalue
     tx2(ik) = sorted( length(sorted)-1 );
     tx3(ik) = sorted( length(sorted)-2 );
-
 %    hold all;
 %    plot(real(eiv),imag(eiv),'ro');
-
-    [ev,D]=eig(L,M); % getting the eigenvectors ev and eigenvalued diagonal matrix D
-
-    % finding eigenvector to max (most unstable) eigenvalue:
-    imax=-1;
-    for iv=1:2*N
-     if (real(D(iv,iv)) == tx(ik))
-      imax = iv;
-     elseif (real(D(iv,iv)) > tx(ik))
-      imax = -13
-      quit;
-     end;
-    end;
-
-    % getting normalized eigenvectors for uz and theta:
-    uz=ev(1:N,imax);
-    uz = uz / max(abs(uz));
-    theta=ev(N+1:2*N,imax);
-    theta = theta / max(abs(theta));
  end;
  TT(it) = Ra;
  maxk(it) = max(tx);
 
+ %% displaying flow field %%
+ k=maxk(it);
+ M=[[D2-k^2*I Z];[Z I ]];
+ L=[[Pr*(D4-2*k^2*D2+k^4*I) -Pr*k^2*I];[Ra*I D2-k^2*I]];
+ [ev,D]=eig(L,M);eva = diag(D);
+ [remax, imax] = max(real(eva));
+
+ % getting normalized eigenvectors for uz:
+ uz = ev(1:N,imax);
+ %theta=ev(N+1:2*N,imax);theta = theta / max(abs(theta));
+ %plot(z,theta,'g');
+ %plot(z,uz,'r');
+ %xlabel("z");
+ %title("Eigenvectors of largest eigenvalue");
+ %legend("theta","uz");
+ %plot(z,sin(z*pi),'ro')
+
+ ux = -1i*k*I \ (D1*uz);
+ x = 2*pi*z/k;
+ T = 0.1;
+ ux = ux * exp(1i*(k*x - eva(imax)*T)); %/ max(abs(ux));
+ uz = uz * exp(1i*(k*x - eva(imax)*T)); %/ max(abs(uz));
+ ux = real(ux);uz = real(uz);
+ figure
+ quiver(x,z,ux,uz)
+ title("Most unstable perturbation");
+ xlabel("x");ylabel("z");
+ hold all;
+ %% end displaying flow field %%
  if (abs(maxk(it)) < 0.01)
   display('Found critical Rayleigh number:');
   Ra
+  figure;
   hold all;
   plot(kk,tx,"b");plot(kk,tx2,"g");plot(kk,tx3,"r");legend("max","2nd","3d");
   xlabel('k');ylabel('Re(s)');
-  % plotting eigenvectors:
-%  figure(1)
-%  hold all;
-%  plot(z,theta,'g');
-%  plot(z,uz,'r');
-%  xlabel("z");
-%  ylabel("Eigenvectors of largest eigenvalue");
-%  legend("theta","uz");
-%plot(z,sin(z*pi),'ro')
   break;
  end
 end;
