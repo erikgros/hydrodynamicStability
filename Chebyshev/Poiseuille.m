@@ -13,7 +13,7 @@ Oi = zeros(No,Ni);
 [ri, DM] = chebdif(Ni+2, 4);
 DM(:,end-1,:) += DM(:,end,:); % Neumann BC
 DM = DM(1:end-1,1:end-1,:);
-ri = ri(2:end);
+ri = ri(1:end-1);
 % rescaling interval
 ri = 0.5 * (ri + 1.0);
 for n=1:4
@@ -30,7 +30,7 @@ for n=1:4 % rescaling:
 end
 D1o=DM(:,:,1);D2o=DM(:,:,2);D3o=DM(:,:,3);D4o=DM(:,:,4);
 
-Ai = mu * (diag(ri(1:end-1)) * D2i(2:end,:) + D1i(2:end,:));
+Ai = mu * (diag(ri(2:end)) * D2i(2:end,:) + D1i(2:end,:));
 Ao =      (diag(ro) * D2o(1:end-1,:) + D1o(1:end-1,:));
 % imposing interface BC with iBC:
 iBC = zeros(1, Ni+No+1);
