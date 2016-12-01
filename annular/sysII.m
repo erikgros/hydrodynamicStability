@@ -1,24 +1,21 @@
 % axisymetric system II from "Lubricated pipelining: stability of core annular flow"
-% only 1 interface BC
 a = 1.43; % outer radius (inner radius = 1)
 m = 0.5; % viscosity ratio
 J = 0.0; % surface tension parameter
+MAXeva = 0.1;
 
-Ni = 40; % number interior points
-No = 20; % number exterior points
+Ni = 40; % number of points inner region
+No = round( (a - 1.0) * Ni ); % number of points outer region
 
 Rei = 26.42;
-Reo = m * Rei;
+Reo = (1.0/m) * Rei;
 Lo = (a - 1.0);
 
-% assembling matrices:
+addpath('../Chebyshev')
+%%% Matrices (inner region): %%%
 Ii = eye(Ni);
 D0i = [zeros(Ni,1) Ii];
-Io = eye(No);
-D0o = [Io zeros(No,1)];
-Oo = zeros(Ni,No);
 Oi = zeros(No,Ni);
-addpath('../Chebyshev')
 [ri, DMi] = chebdif(Ni+2, 4); % using 2 ghost points (one at each boundary)
 DMi = DMi(1:end-1,1:end-1,:); % u1(0) = 0
 ri = ri(2:end-1);
@@ -27,6 +24,11 @@ for n=1:4
  DMi(:,:,n) *= (2.0/1.0)^n; % rescaling derivative
 end
 D1i=DMi(:,:,1);D2i=DMi(:,:,2);D3i=DMi(:,:,3);D4i=DMi(:,:,4);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Matrices (outer region): %%%
+Io = eye(No);
+D0o = [Io zeros(No,1)];
+Oo = zeros(Ni,No);
 [ro, DMo] = chebdif(No+3, 4); % using 3 ghost points
 % u2(a) = u2'(a)= 0:
 for n=1:4
@@ -43,37 +45,91 @@ for n=1:4
  DMo(:,:,n) *= (2.0/Lo)^n; % rescaling derivative
 end
 D1o=DMo(:,:,1);D2o=DMo(:,:,2);D3o=DMo(:,:,3);D4o=DMo(:,:,4);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+r = [ro;1.0;ri];
 
-% base flow:
+%%% Base flow: %%%
 [Wi, dWi] = baseFlowI(ri,a,m);
 [Wo, dWo] = baseFlowI(ro,a,m);
-r = [ro;1.0;ri];
-kk = [0:0.5:20];
+[W, dW] = baseFlowI(r,a,m);
+[Wat1, dW2at1] = baseFlowI( 1.0, a, m);
+%%%%%%%%%%%%%%%%%%
+
+kk = [1:0.2:30];
 for ik = 1:length(kk)
  k = kk(ik);
- % A, B given by (5.25):
- Ai = diag(ri.^4) * D4i(2:end,:) + 2.0 * diag(ri.^3) * D3i(2:end,:) - ( ( Rei * 1i * k * diag(Wi) + 2.0 * k.^2 * Ii ) * diag(ri.^2) + 3.0 * Ii ) * diag(ri.^2) * D2i(2:end,:) - ( ( Rei * 1i * k * diag(Wi) + 2.0 * k.^2 * Ii ) * diag(ri.^2) - 3.0 * Ii ) * diag(ri) * D1i(2:end,:) + ( ( Rei * 1i * k * diag(Wi) * diag(ri.^2) ) * ( k.^2 * diag(ri.^2) + Ii ) * D0i + k.^4 * diag(ri.^4) * D0i +  2.0 * k.^2 * diag(ri.^2) * D0i- 3.0 * D0i );
- Ao = diag(ro.^4) * D4o(1:end-1,:) + 2.0 * diag(ro.^3) * D3o(1:end-1,:) - ( ( Reo * 1i * k * diag(Wo) + 2.0 * k.^2 * Io ) * diag(ro.^2) + 3.0 * Io ) * diag(ro.^2) * D2o(1:end-1,:) - ( ( Reo * 1i * k * diag(Wo) + 2.0 * k.^2 * Io ) * diag(ro.^2) - 3.0 * Io ) * diag(ro) * D1o(1:end-1,:) + ( ( Reo * 1i * k * diag(Wo) * diag(ro.^2) ) * ( k.^2 * diag(ro.^2) + Io ) * D0o + k.^4 * diag(ro.^4) * D0o +  2.0 * k.^2 * diag(ro.^2) * D0o- 3.0 * D0o );
- Bi = Rei * 1i * k * diag(ri.^2) * ( diag(ri.^2) * D2i(2:end,:) + diag(ri) * D1i(2:end,:) + k.^2 * diag(ri.^2) *  D0i + D0i );
- Bo = Reo * 1i * k * diag(ro.^2) * ( diag(ro.^2) * D2o(1:end-1,:) + diag(ro) * D1o(1:end-1,:) + k.^2 * diag(ro.^2) *  D0o + D0o );
- %%%% interface BC only (5.27b): %%%
- Abc = zeros(1, Ni+No+1);
- Abc(1:No+1) -= m * Rei * Wi(1.0) * ( D3o(end,:) + 2.0 * D2o(end,:) - (3.0 * k^2 + 1) * D1o(end,:) - (m - 1.0) * (k^2 - 1.0) * D0o(end,:) / m ) - k * 1i * J *(k^2 - 1.0) * D0o(end,:);
- Abc(No+1:end) +=   Rei * Wi(1.0) * ( D3i(1,:) + 2.0 * D2i(1,:) - (3.0 * k^2 + 1) * D1i(1,:) );
- Bbc = zeros(1, Ni+No+1);
- Bbc(1:No+1) -= m * Rei * ( D3o(end,:) + 2.0 * D2o(end,:) - (3.0 * k^2 + 1) * D1o(end,:) - (m - 1.0) * (k^2 - 1.0) * D0o(end,:) / m );
- Bbc(No+1:end) +=   Rei * ( D3i(1,:) + 2.0 * D2i(1,:) - (3.0 * k^2 + 1) * D1i(1,:) );
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- A = [[Ao Oi];Abc;[Oo Ai]];
- B = [[Bo Oi];Bbc;[Oo Bi]];
- %A u = B c u
- [eve,eva] = eig(A,B);
+ %%% A, B given by (5.25): %%%
+ Ai = diag(ri.^4) * D4i(2:end,:) ...
+      + 2.0 * diag(ri.^3) * D3i(2:end,:) ...
+      - ( ( Rei * 1i * k * diag(Wi) + 2.0 * k.^2 * Ii ) * diag(ri.^2) + 3.0 * Ii ) * diag(ri.^2) * D2i(2:end,:) ...
+      - ( ( Rei * 1i * k * diag(Wi) + 2.0 * k.^2 * Ii ) * diag(ri.^2) - 3.0 * Ii ) * diag(ri) * D1i(2:end,:) ...
+      + ( ( Rei * 1i * k * diag(Wi) * diag(ri.^2) ) * ( k.^2 * diag(ri.^2) + Ii ) + k.^4 * diag(ri.^4) +  2.0 * k.^2 * diag(ri.^2) - 3.0 * Ii ) * D0i;
+
+ Ao = diag(ro.^4) * D4o(1:end-1,:) ...
+      + 2.0 * diag(ro.^3) * D3o(1:end-1,:) ...
+      - ( ( Reo * 1i * k * diag(Wo) + 2.0 * k.^2 * Io ) * diag(ro.^2) + 3.0 * Io ) * diag(ro.^2) * D2o(1:end-1,:) ...
+      - ( ( Reo * 1i * k * diag(Wo) + 2.0 * k.^2 * Io ) * diag(ro.^2) - 3.0 * Io ) * diag(ro) * D1o(1:end-1,:) ...
+      + ( ( Reo * 1i * k * diag(Wo) * diag(ro.^2) ) * ( k.^2 * diag(ro.^2) + Io ) + k.^4 * diag(ro.^4) +  2.0 * k.^2 * diag(ro.^2) - 3.0 * Io ) * D0o;
+
+ Bi = -Rei * 1i * k * diag(ri.^2) * ( diag(ri.^2) * D2i(2:end,:) + diag(ri) * D1i(2:end,:) - k.^2 * diag(ri.^2) *  D0i + D0i );
+ Bo = -Reo * 1i * k * diag(ro.^2) * ( diag(ro.^2) * D2o(1:end-1,:) + diag(ro) * D1o(1:end-1,:) - k.^2 * diag(ro.^2) *  D0o + D0o );
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ %%% interface BC (5.27b-3): %%%
+ Abc3 = zeros(1, Ni+No+1);
+ Abc3(1:No+1) -= m * Rei * Wi(1.0) * ( D3o(end,:) + 2.0 * D2o(end,:) - (3.0 * k^2 + 1) * D1o(end,:) - (m - 1.0) * (k^2 - 1.0) * D0o(end,:) / m ) - k * 1i * J *(k^2 - 1.0) * D0o(end,:);
+ Abc3(No+1:end) +=   Rei * Wi(1.0) * ( D3i(1,:) + 2.0 * D2i(1,:) - (3.0 * k^2 + 1) * D1i(1,:) );
+ Bbc3 = zeros(1, Ni+No+1);
+ Bbc3(1:No+1) -= m * Rei * ( D3o(end,:) + 2.0 * D2o(end,:) - (3.0 * k^2 + 1) * D1o(end,:) - (m - 1.0) * (k^2 - 1.0) * D0o(end,:) / m );
+ Bbc3(No+1:end) +=   Rei * ( D3i(1,:) + 2.0 * D2i(1,:) - (3.0 * k^2 + 1) * D1i(1,:) );
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ A = [[Ao Oi];Abc3;[Oo Ai]];
+ B = [[Bo Oi];Bbc3;[Oo Bi]];
+ ii = size(Ao,1) + 1;
+ %%% interface BC (5.27b-2): %%% ( using DOF ii+1 )
+ D12i = D1i + D2i;
+ D12o = D1o + D2o;
+ Abc2 = zeros(1, Ni+No+1);
+ Abc2(1:No+1) -= m * D12o(end,:);
+ Abc2(No+1:end) +=   D12i(1,:);
+ Bbc2 = zeros(1, Ni+No+1);
+ for p = 1:size(A,2)
+  A(ii+1,p) = Abc2(p);
+  B(ii+1,p) = Bbc2(p);
+ end
+ A(ii+1, ii) += (k^2-1.0)*(1.0-m);
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ %%% interface BC (5.27b-1): %%% ( using DOF ii-1 )
+ Abc1 = zeros(1, Ni+No+1);
+ Abc1(1:No+1) -= Wat1 * D1o(end,:);
+ Abc1(No+1:end) += Wat1 * D1i(1,:);
+ Bbc1 = zeros(1, Ni+No+1);
+ Bbc1(1:No+1) -= D1o(end,:);
+ Bbc1(No+1:end) += D1i(1,:);
+ for p = 1:size(A,2)
+  A(ii-1,p) = Abc1(p);
+  B(ii-1,p) = Bbc1(p);
+ end
+ A(ii-1, ii) -= (m - 1.0) * dW2at1;
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ [eve,eva] = eig(A,B); % solving A u = B c u
  c = diag(eva);
  omega = c * k;
- [taux(ik), ip] = max(imag(omega));
- u = eve(:,ip);
- plot(r, u)
+
+ %%% filtering spurious eigenvalues: %%%
+ tau = imag(omega);
+ tau = tau .* isfinite(tau);
+ tau = tau .* (tau < MAXeva);
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ [taux(ik), ip] = max(tau);
+% for ip = 1:size( c )
+% u = eve(:,ip);
+% figure(1)
+% plot(r, u,'bk'); hold on; plot(r, W, 'r')
+% ylabel('w'); xlabel('r');legend('perturbation','base flow')
+% pause(1)
+% end
 end
-figure
-plot(kk, taux);xlabel('k');ylabel('Im(\omega)');
+figure(2)
+hold on
+plot(kk, taux,'bk');xlabel('k');ylabel('Im(\omega)');
 title('growth rate');
