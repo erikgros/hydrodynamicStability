@@ -1,33 +1,37 @@
 % absolute/convective transition of Kelvin-Helmholtz instability
 Rt = 1 / 3;
 % R < 1 / 3: Im(omega_0) = 0
-% R > 1 / 3: find out for which R is domegaM/dk = 0 at which (k0m\k0p)?
-RR = [-7:0.001:Rt];
-RR = [Rt:0.01:10];
+% R > 1 / 3: None of the omega_0 branches ever crosses the real axis
+RR = [-7:0.001:Rt];%RR = [2000:100:10000];
 %RR = [-5 -1];
 %RR = [0.01:0.01:Rt+0.1];
 for l = 1:length(RR)
  R = RR(l);
  k0p = 2 * ( ( 3 + 1/R ) + sqrt( ( 1/R )*( 1/R - 3 ) ) ) / 9;
  k0m = 2 * ( ( 3 + 1/R ) - sqrt( ( 1/R )*( 1/R - 3 ) ) ) / 9;
+ figure(1)
+ plot(real(k0m),imag(k0m),'.b',real(k0p),imag(k0p),'+bk'); hold on
+ xlabel('Re(k_0)');ylabel('Im(k_0)');legend('k_0^-','k_0^+')
  k0 = k0m;
  om0p = k0 + sqrt(R * ( k0^3 - k0^2 ) );
  om0m = k0 - sqrt(R * ( k0^3 - k0^2 ) );
  om0i(l) = abs(imag(om0m)) + abs(imag(om0p));
- plot(real(om0m),imag(om0m),real(om0p),imag(om0p),'r'); hold on
+ figure(2)
+ plot(real(om0m),imag(om0m),'.g',real(om0p),imag(om0p),'.r'); hold on
  k0 = k0p;
  om0p = k0 + sqrt(R * ( k0^3 - k0^2 ) );
  om0m = k0 - sqrt(R * ( k0^3 - k0^2 ) );
- plot(real(om0m),imag(om0m),'g',real(om0p),imag(om0p),'bk'); hold on
+ figure(2)
+ plot(real(om0m),imag(om0m),'+g',real(om0p),imag(om0p),'+r'); hold on
+ xlabel('Re(\omega_0)');ylabel('Im(\omega_0)');legend('\omega_0^-','\omega_0^+')
  om0 = om0m;
  om0r(l) = real(om0);
  om0i(l) += abs(imag(om0m)) + abs(imag(om0p));
 end
-xlabel('Re(\omega_0)');ylabel('Im(\omega_0)');
-figure
-plot(RR, om0r, RR, om0i, 'r')
-xlabel('R');legend('Re(\omega_0)','||Im(\omega_0)||')
-max(om0i)
+%figure
+%plot(RR, om0r, RR, om0i, 'r')
+%xlabel('R');legend('Re(\omega_0)','||Im(\omega_0)||')
+%max(om0i)
 return
 
 kr=[-2:0.1:2];
