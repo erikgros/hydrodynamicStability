@@ -1,0 +1,16 @@
+# comparing with data of Fig2 in "Lubricated pipelining: stability of core annular flow II"
+set xlabel "Re" offset 0,0
+set ylabel "max growth rate" offset 1,0
+set key right top
+set key box linestyle 1
+set grid
+set terminal png
+set datafile separator ","
+set output "Fig2sig.png"
+#--------------------------------------------------
+
+eta = 0.8
+plot "./fig2sig.csv" using 1:2 w l title "reference", "sigFig2.csv" using 1:2 w p title "current"
+set output "Fig2k.png"
+set ylabel "k" offset 1,0
+plot "./fig2k.csv" using 1:(eta*$2) w l title "reference", "kFig2.csv" using 1:2 w p title "current"

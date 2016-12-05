@@ -5,12 +5,14 @@ a = 1.0 / 0.8; % outer radius (inner radius = 1)
 m = 0.1; % viscosity ratio
 %J = 0;
 J = 0.8*1000.0; % surface tension parameter
-MAXeva = 0.4;
+MAXeva = 0.3; % threshold above which eigenvalues are not considered
 
 Ni = 40; % number of points inner region
 No = round( (a - 1.0) * Ni ); % number of points outer region
 
 %Rei = 26.42;
+Fig2sig = [];
+Fig2k = [];
 for Re = 10:20:500
 Rei = 0.8 * Re;
 Reo = (1.0/m) * Rei;
@@ -140,6 +142,8 @@ end
  [tauMax, ikMax] = max(taux);
  kMax = kk(ikMax);
 %%% reproducing Fig. 2 of paper II %%%
+ Fig2sig = [Fig2sig; [Re tauMax]];
+ Fig2k = [Fig2k; [Re kMax]];
  figure(1);hold on
  plot(Re,tauMax,'dbk')
  xlabel('Re');ylabel('\sigma_{max}');
@@ -148,3 +152,5 @@ end
  xlabel('Re');ylabel('k_{max}');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
+csvwrite('sigFig2.csv',Fig2sig)
+csvwrite('kFig2.csv',Fig2k)
