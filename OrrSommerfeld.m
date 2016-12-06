@@ -1,33 +1,30 @@
 % solving the Orr Sommerfeld equation to study the stability of 2d Poiseuille flow
 Re = 5772.22;
-N = 120;
+N = 60;
 h = 1.0; % half of distance between plates
-dy = 2*h / (N+1);
-y = [-h+dy:dy:h-dy]';
 
-% begin
 I = eye(N);
 Z = zeros(N);
-D2 = -2 * eye(N);
-for ii=1:N-1
- D2(ii,ii+1) = 1;
- D2(ii+1,ii) = 1;
-end
-D2 = D2 / (dy^2);
-D4 = 6 * eye(N);
-for ii = 1:N-1
- D4(ii,ii+1) = -4;
- D4(ii+1,ii) = -4;
- if ( ii <= N-2)
-  D4(ii,ii+2) = 1;
-  D4(ii+2,ii) = 1;
+addpath('./Chebyshev')
+[y, DM] = chebdif(N+4, 4);
+% 0th and first derivative vanish at boundary points:
+for n=1:4
+ for o=3:N+2
+  for p=3:N+2
+   DM(p,o,n) -= DM(2,o,1) .* DM(p,2,n) / DM(2,2,1);
+   DM(p,o,n) -= DM(end-1,o,1) .* DM(p,end-1,n) / DM(end-1,end-1,1);
+  end
  end
 end
-
-% no-slip BC:
-D4(1,1) = 7;
-D4(N,N) = 7;
-D4 = D4/(dy^4);
+DM = DM(3:end-2,3:end-2,:); % removing BC points
+y = y(3:end-2);
+% rescaling interval
+y = h * y;
+halfMinusY = 0.5 * I - diag(y);
+for n=1:4 % rescaling:
+ DM(:,:,n) *= (1/h)^n;
+end
+D1=DM(:,:,1);D2=DM(:,:,2);D3=DM(:,:,3);D4=DM(:,:,4);
 
 Up = 1.0 *( h^2 .- y.^2) / (h^2); % 2d Poiseuille profile
 U2p = -2.0 * ones(N,1) / (h^2); % second derivative
@@ -57,13 +54,13 @@ kMax
 % plotting:
 figure(1)
 hold on;
-plot(imag(omegaMax),-real(omegaMax),'o');axis([-1 0 -1 0]); % like Wikipedia
+plot(imag(omegaMax),-real(omegaMax),'+');%axis([-1 0 -1 0]); % like Wikipedia
 ylabel('-Re(\omega)');xlabel('Im(\omega)');
 %plot(real(omegaMax),imag(omegaMax),'o');xlabel('Re(\omega)');ylabel('Im(\omega)');
 title("critical conditions")
 
 figure(2);hold all;
-plot(kk, taux);xlabel('k');ylabel('Im(\omega)');
+plot(kk, taux,'+');xlabel('k');ylabel('Im(\omega)');
 end
 legend('Re = 1772','     5772','     9772');
 
