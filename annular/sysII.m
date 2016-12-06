@@ -1,21 +1,31 @@
 % axisymetric system II from "Lubricated pipelining: stability of core annular flow"
-%a = 1.43;
-a = 1.0 / 0.8; % outer radius (inner radius = 1)
-%m = 0.5;
-m = 0.1; % viscosity ratio
-%J = 0;
-J = 0.8*1000.0; % surface tension parameter
+Fall = 1
+
+if (Fall == 1)
+ a = 1.43;
+ m = 0.5;
+ J = 0;
+ ReiRei = [26.42];
+ kk = [0.01:0.5:25];
+elseif (Fall == 2)
+ a = 1.0 / 0.8; % outer radius (inner radius = 1)
+ m = 0.1; % viscosity ratio
+ J = 0.8*1000.0; % surface tension parameter
+ ReiRei = 0.8 * [10:20:500];
+ kk = [0.01:0.01:5];
+end
 MAXeva = 0.3; % threshold above which eigenvalues are not considered
 
 Ni = 40; % number of points inner region
 No = round( (a - 1.0) * Ni ); % number of points outer region
 
-%Rei = 26.42;
 Fig2sig = [];
 Fig2k = [];
-for Re = 10:20:500
-Rei = 0.8 * Re;
+GR = [];
+for iRR = 1:length(ReiRei)
+Rei = ReiRei(iRR);
 Reo = (1.0/m) * Rei;
+Re = Rei / 0.8; % for paper II data
 Lo = (a - 1.0);
 
 addpath('../Chebyshev')
@@ -62,7 +72,6 @@ r = [ro;1.0;ri];
 [Wat1, dW2at1] = baseFlowI( 1.0, a, m);
 %%%%%%%%%%%%%%%%%%
 
-kk = [0.01:0.01:5];
 for ik = 1:length(kk)
  k = kk(ik);
  %%% A, B given by (5.25): %%%
@@ -128,6 +137,12 @@ for ik = 1:length(kk)
  tau = tau .* (tau < MAXeva);
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  [taux(ik), ip] = max(tau);
+ if (0)%(k<5) % taking second largest
+  tau(ip) = -1000000;
+  [taux(ik), ip] = max(tau);
+ end
+ GR = [GR; k taux(ik)];
+ %%% plotting eigenvectors: %%%
 % for ip = 1:size( c )
 % u = eve(:,ip);
 % figure(1)
@@ -135,10 +150,17 @@ for ik = 1:length(kk)
 % ylabel('w'); xlabel('r');legend('perturbation','base flow')
 % pause(1)
 % end
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
-%figure(2);hold on
-%plot(kk, taux,'bk');xlabel('k');ylabel('Im(\omega)');
-%title('growth rate');
+%%% reproducing Fig. 2 of paper I %%%
+figure(2);hold on
+plot(kk, taux,'x');xlabel('k');ylabel('Im(\omega)');
+title('growth rate');
+csvwrite('growRate.csv',GR)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if (Fall == 1)
+ return
+end
  [tauMax, ikMax] = max(taux);
  kMax = kk(ikMax);
 %%% reproducing Fig. 2 of paper II %%%
