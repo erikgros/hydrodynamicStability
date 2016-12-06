@@ -6,25 +6,14 @@ h = 1.0; % half of distance between plates
 I = eye(N);
 Z = zeros(N);
 addpath('./Chebyshev')
-[y, DM] = chebdif(N+4, 4);
-% 0th and first derivative vanish at boundary points:
-for n=1:4
- for o=3:N+2
-  for p=3:N+2
-   DM(p,o,n) -= DM(2,o,1) .* DM(p,2,n) / DM(2,2,1);
-   DM(p,o,n) -= DM(end-1,o,1) .* DM(p,end-1,n) / DM(end-1,end-1,1);
-  end
- end
-end
-DM = DM(3:end-2,3:end-2,:); % removing BC points
-y = y(3:end-2);
-% rescaling interval
+[y,DM] = chebdif(N+2,2);
+D2 = DM(2:N+1,2:N+1,2); % Dirichlet BCs
+%y = x(2:end-1);
+[y,D4] = cheb4c(N+2); % using cheb4c to enforce clamped BC
+% rescaling interval:
+D2(:,:) *= (1/h)^2; % rescaling
+D4(:,:) *= (1/h)^4; % rescaling
 y = h * y;
-halfMinusY = 0.5 * I - diag(y);
-for n=1:4 % rescaling:
- DM(:,:,n) *= (1/h)^n;
-end
-D1=DM(:,:,1);D2=DM(:,:,2);D3=DM(:,:,3);D4=DM(:,:,4);
 
 Up = 1.0 *( h^2 .- y.^2) / (h^2); % 2d Poiseuille profile
 U2p = -2.0 * ones(N,1) / (h^2); % second derivative
