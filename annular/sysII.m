@@ -1,34 +1,10 @@
+function [taux] = sysII(a, m, J, Rei, Ni, kk, MAXeva)
 % axisymetric system II from "Lubricated pipelining: stability of core annular flow"
-Fall = 1
-
-if (Fall == 1)
- a = 1.43;
- m = 0.5;
- J = 0;
- ReiRei = [26.42];
- kk = [0.01:0.5:25];
-elseif (Fall == 2)
- a = 1.0 / 0.8; % outer radius (inner radius = 1)
- m = 0.1; % viscosity ratio
- J = 0.8*1000.0; % surface tension parameter
- ReiRei = 0.8 * [10:20:500];
- kk = [0.01:0.01:5];
-end
-MAXeva = 0.3; % threshold above which eigenvalues are not considered
-
-Ni = 40; % number of points inner region
-No = round( (a - 1.0) * Ni ); % number of points outer region
-
-Fig2sig = [];
-Fig2k = [];
-GR = [];
-for iRR = 1:length(ReiRei)
-Rei = ReiRei(iRR);
 Reo = (1.0/m) * Rei;
-Re = Rei / 0.8; % for paper II data
 Lo = (a - 1.0);
-
+No = round( (a - 1.0) * Ni ); % number of points outer region
 addpath('../Chebyshev')
+
 %%% Matrices (inner region): %%%
 Ii = eye(Ni);
 D0i = [zeros(Ni,1) Ii];
@@ -141,7 +117,6 @@ for ik = 1:length(kk)
   tau(ip) = -1000000;
   [taux(ik), ip] = max(tau);
  end
- GR = [GR; k taux(ik)];
  %%% plotting eigenvectors: %%%
 % for ip = 1:size( c )
 % u = eve(:,ip);
@@ -152,27 +127,4 @@ for ik = 1:length(kk)
 % end
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
-%%% reproducing Fig. 2 of paper I %%%
-figure(2);hold on
-plot(kk, taux,'x');xlabel('k');ylabel('Im(\omega)');
-title('growth rate');
-csvwrite('growRate.csv',GR)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if (Fall == 1)
- return
-end
- [tauMax, ikMax] = max(taux);
- kMax = kk(ikMax);
-%%% reproducing Fig. 2 of paper II %%%
- Fig2sig = [Fig2sig; [Re tauMax]];
- Fig2k = [Fig2k; [Re kMax]];
- figure(1);hold on
- plot(Re,tauMax,'dbk')
- xlabel('Re');ylabel('\sigma_{max}');
- figure(2);hold on
- plot(Re,kMax,'^bk');
- xlabel('Re');ylabel('k_{max}');
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-end
-csvwrite('sigFig2.csv',Fig2sig)
-csvwrite('kFig2.csv',Fig2k)
+
