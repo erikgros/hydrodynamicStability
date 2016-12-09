@@ -57,8 +57,8 @@ for it=1:6
   Ra += -maxk(it-1) * (TT(it-1) - TT(it-2)) /(maxk(it-1) - maxk(it-2));
  end;
 
-  kk=[1.5:0.1:4]; % all k-values
-  for ik=1:length(kk)
+ kk=[1.5:0.1:4]; % all k-values
+ for ik=1:length(kk)
     k=kk(ik);
     M=[[D2-k^2*I Z];[Z I ]];
     L=[[Pr*(D4-2*k^2*D2+k^4*I) -Pr*k^2*I];[Ra*I D2-k^2*I]];
@@ -71,10 +71,10 @@ for it=1:6
 %    plot(real(eiv),imag(eiv),'ro');
  end;
  TT(it) = Ra;
- maxk(it) = max(tx);
+ [maxk(it), ikmax]  = max(tx);
 
  %% displaying flow field %%
- k=maxk(it);
+ k=kk(ikmax);
  M=[[D2-k^2*I Z];[Z I ]];
  L=[[Pr*(D4-2*k^2*D2+k^4*I) -Pr*k^2*I];[Ra*I D2-k^2*I]];
  [ev,D]=eig(L,M);eva = diag(D);
@@ -93,8 +93,11 @@ for it=1:6
  ux = -1i*k*I \ (D1*uz);
  x = 2*pi*z/k;
  T = 0.1;
- ux = ux * exp(1i*(k*x - eva(imax)*T)); %/ max(abs(ux));
- uz = uz * exp(1i*(k*x - eva(imax)*T)); %/ max(abs(uz));
+% eva = -1i*omega!!!!
+ ux = ux * exp(1i*k*x + eva(imax)*T);
+% max(abs(ux))
+ uz = uz * exp(1i*k*x + eva(imax)*T);
+% max(abs(uz))
  ux = real(ux);uz = real(uz);
  figure
  quiver(x,z,ux,uz)
