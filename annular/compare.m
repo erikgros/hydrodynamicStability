@@ -6,12 +6,14 @@ thres = 0.3; % threshold above which eigenvalues are not considered
 if (Fall == 1)
  a = 1.43;
  m = 0.5;
+ zeta = 1;
  J = 0;
  ReiRei = [26.42];
  kk = [0.01:0.5:25];
 elseif (Fall == 2)
  a = 1.0 / 0.8; % outer radius (inner radius = 1)
  m = 0.1; % viscosity ratio
+ zeta = 1;
  J = 0.8*1000.0; % surface tension parameter
  ReiRei = 0.8 * [10:20:500];
  kk = [0.01:0.01:5];
