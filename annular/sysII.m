@@ -13,8 +13,8 @@ Oi = zeros(No,Ni);
 DMi = DMi(1:end-1,1:end-1,:); % u1(0) = 0
 ri = ri(2:end-1);
 ri = 0.5 * (ri + 1.0); % rescaling interval
-for n=1:4
- DMi(:,:,n) *= (2.0/1.0)^n; % rescaling derivative
+for l=1:4
+ DMi(:,:,l) *= (2.0/1.0)^l; % rescaling derivative
 end
 D1i=DMi(:,:,1);D2i=DMi(:,:,2);D3i=DMi(:,:,3);D4i=DMi(:,:,4);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -24,18 +24,18 @@ D0o = [Io zeros(No,1)];
 Oo = zeros(Ni,No);
 [ro, DMo] = chebdif(No+3, 4); % using 3 ghost points
 % u2(a) = u2'(a)= 0:
-for n=1:4
+for l=1:4
  for o=3:No+3
   for p=3:No+3
-   DMo(p,o,n) -= DMo(2,o,1) .* DMo(p,2,n) / DMo(2,2,1);
+   DMo(p,o,l) -= DMo(2,o,1) .* DMo(p,2,l) / DMo(2,2,1);
   end
  end
 end
 DMo = DMo(3:end,3:end,:);
 ro = ro(3:end-1);
 ro = Lo * 0.5 * (ro + 1.0) + 1.0; % rescaling interval
-for n=1:4
- DMo(:,:,n) *= (2.0/Lo)^n; % rescaling derivative
+for l=1:4
+ DMo(:,:,l) *= (2.0/Lo)^l; % rescaling derivative
 end
 D1o=DMo(:,:,1);D2o=DMo(:,:,2);D3o=DMo(:,:,3);D4o=DMo(:,:,4);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
