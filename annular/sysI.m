@@ -3,18 +3,24 @@ function [taux] = sysI(a, m, zeta, J, Rei, Ni, kk)
 Reo = (zeta / m) * Rei;
 Lo = (a - 1.0);
 No = round( (a - 1.0) * Ni ); % number of inner points in outer region
-n = 0; % BC are only for axisymmetric
+n = 5; % BC are only for axisymmetric
 addpath('../Chebyshev')
 
 % we only impose the B.C. at r=a in all matrices
 % the variable have 2 DOF at r=1
 %%% Matrices (inner region): %%%
 [ri, DMi] = chebdif(Ni+2, 3); % using an additional point at each boundary
+nn = 0;
+if ( n > 1 )
+ nn = 1;
+ DMi = DMi(1:end-1,1:end-1,:); % u(0) = v(0) = w(0) = 0
+ ri = ri(1:end-1);
+end
 ri = 0.5 * (ri + 1.0); % rescaling interval
 for l=1:3
  DMi(:,:,l) *= (2.0/1.0)^l; % rescaling derivative
 end
-D0i = eye(Ni+2);
+D0i = eye(Ni+2-nn);
 D1i=DMi(:,:,1);D2i=DMi(:,:,2);D3i=DMi(:,:,3);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Matrices (outer region): %%%
@@ -29,8 +35,8 @@ D0o = eye(No+1);
 D1o=DMo(:,:,1);D2o=DMo(:,:,2);D3o=DMo(:,:,3);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 r = [ro;ri(2:end)]; % length(r) = (No + 1) + (Ni + 2 -1)
-Oi = zeros(No+1,Ni+2);
-Oo = zeros(Ni+2,No+1);
+Oi = zeros(No+1,Ni+2-nn);
+Oo = zeros(Ni+2-nn,No+1);
 %D0 = eye(Ni+No+3);
 ii = No + 1; %one = r(ii)
 
@@ -40,6 +46,7 @@ ii = No + 1; %one = r(ii)
 [W, dW] = baseFlowI(r,a,m);
 [Wat1, dW2at1] = baseFlowI( 1.0, a, m);
 dWjump = 2.0*(1.0-m)/(a-(1.0-m)/a);
+dWzetaJump = 2.0*(1.0-m*zeta)/(a-(1.0-m)/a);
 d2Wi = -2.0 * m / (a - (1.0-m)/a);
 d2Wo = -2.0 / (a - (1.0-m)/a);
 %%%%%%%%%%%%%%%%%%
@@ -129,6 +136,95 @@ for ik = 1:length(kk)
  Bwv = zeros(size(Awu));
  Bww = zeros(size(Awu));
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ %%% B.C. at r = 0 %%%
+ if(n==0)
+ Auu(end,:) = 0;Auu(end,end) = 1;
+ Auv(end,:) = 0;
+ Auw(end,:) = 0;
+ Avu(end,:) = 0;
+ Avv(end,:) = 0;Avv(end,end) = 1;
+ Avw(end,:) = 0;
+ Awu(end,:) = 0;
+ Awv(end,:) = 0;
+ Aww(end,:) = 0;Aww(end,end) = k;
+ Awu(end,end-size(D1i,2)+1:end) = 2.0 * D1i(end,:);
+
+ Buu(end,:) = 0;
+ Buv(end,:) = 0;
+ Buw(end,:) = 0;
+ Bvu(end,:) = 0;
+ Bvv(end,:) = 0;
+ Bvw(end,:) = 0;
+ Bwu(end,:) = 0;
+ Bwv(end,:) = 0;
+ Bww(end,:) = 0;
+ elseif (n == 1)
+ return
+ end
+ %%%%%%%%%%%%%%%%%%%%%
+ %%% B.C. (5.7-8) %%%
+ Auu(ii,:) = 0;
+ Auv(ii,:) = 0;
+ Auw(ii,:) = 0;
+ Avu(ii,:) = 0;
+ Avv(ii,:) = 0;
+ Avw(ii,:) = 0;
+ Awu(ii,:) = 0;
+ Awv(ii,:) = 0;
+ Aww(ii,:) = 0;
+ Buu(ii,:) = 0;
+ Buv(ii,:) = 0;
+ Buw(ii,:) = 0;
+ Bvu(ii,:) = 0;
+ Bvv(ii,:) = 0;
+ Bvw(ii,:) = 0;
+ Bwu(ii,:) = 0;
+ Bwv(ii,:) = 0;
+ Bww(ii,:) = 0;
+ Auu(ii,ii) = 1;Auu(ii,ii+1) = -1;
+ Avv(ii,ii) = 1;Avv(ii,ii+1) = -1;
+ Awu(ii,ii) = dWjump;
+ Aww(ii,ii) = -Wat1 * k;Aww(ii,ii+1) = Wat1 * k;
+ Bww(ii,ii) = -k;Bww(ii,ii+1) = k;
+ %%%%%%%%%%%%%%%%%%%%
+ %%% B.C. (5.9-10) & (5.14) %%%
+ Auu(ii+1,:) = 0;
+ Auv(ii+1,:) = 0;
+ Auw(ii+1,:) = 0;
+ Avu(ii+1,:) = 0;
+ Avv(ii+1,:) = 0;
+ Avw(ii+1,:) = 0;
+ Awu(ii+1,:) = 0;
+ Awv(ii+1,:) = 0;
+ Aww(ii+1,:) = 0;
+ Buu(ii+1,:) = 0;
+ Buv(ii+1,:) = 0;
+ Buw(ii+1,:) = 0;
+ Bvu(ii+1,:) = 0;
+ Bvv(ii+1,:) = 0;
+ Bvw(ii+1,:) = 0;
+ Bwu(ii+1,:) = 0;
+ Bwv(ii+1,:) = 0;
+ Bww(ii+1,:) = 0;
+ %% (5.9) %%
+ Auw(ii+1,1:ii) = -m * D1o(ii,:);
+ Auw(ii+1,ii+1:end) = D1i(1,:);
+ Auu(ii+1,1:ii) = m * k * D0o(ii,:);
+ Auu(ii+1,ii+1:end) = -k * D0i(1,:);
+ %%%%%%%%%%%
+ %% (5.10) %%
+ Avv(ii+1,1:ii) = -m * (D1o(ii,:) - D0o(ii,:));
+ Avv(ii+1,ii+1:end) = D1i(1,:) - D0i(1,:);
+ Avu(ii+1,1:ii) = m * n * D0o(ii,:);
+ Avu(ii+1,ii+1:end) = -n * D0i(1,:);
+ %%%%%%%%%%%%
+ Aww(ii+1,1:ii) = -( J *(1.0 - k^2 - n^2) * D0o(ii,:) / (dWjump * Rei^2) + m * (1i/k) * (D2o(ii,:) + D1o(ii,:) - (k^2 + n^2) * D1o(ii,:)) + Wat1 * (zeta - dWzetaJump / dWjump) * D1o(ii,:) );
+ Aww(ii+1,ii+1:end) = J *(1.0 - k^2 - n^2) * D0i(1,:) / (dWjump * Rei^2) + (1i/k) * (D2i(1,:) + D1i(1,:) - (k^2 + n^2) * D1i(1,:)) + Wat1 * (1.0 - dWzetaJump / dWjump) * D1i(1,:);
+ Awu(ii+1,1:ii) = -2i * m  * D1o(ii,:);
+ Awu(ii+1,ii+1:end) = 2i * D1i(1,:);
+ Bww(ii+1,1:ii) = -(zeta - dWzetaJump / dWjump) * D1o(ii,:);
+ Bww(ii+1,ii+1:end) = (1.0 - dWzetaJump / dWjump) * D1i(1,:);
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
  A = [ [Auu Auv Auw]; ...
        [Avu Avv Avw]; ...
@@ -148,8 +244,9 @@ for ik = 1:length(kk)
  [taux(ik), ip] = max(tau);
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %%% plotting eigenvectors: %%%
-% lgth = size(eve,1) / 3;
-% u = eve(1:lgth,ip);
+ %lgth = size(eve,1) / 3;
+ %u = eve(1:lgth,ip);
+ %u(ii) - u(ii+1)
 % u = u([1:ii, ii+2:lgth]);
 % figure(1)
 % plot(r, u,'bk'); hold on; plot(r, W, 'r')
