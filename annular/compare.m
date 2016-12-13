@@ -1,9 +1,10 @@
 % comparing results with references
 Fall = 1
-Ni = 40; % number of points inner region
+Ni = 25; % number of points inner region
 thres = 0.3; % threshold above which eigenvalues are not considered
 
 if (Fall == 1)
+ n = 0;
  a = 1.43;
  m = 0.5;
  zeta = 1;
@@ -11,6 +12,7 @@ if (Fall == 1)
  ReiRei = [26.42];
  kk = [0.01:0.5:25];
 elseif (Fall == 2)
+ n = 0;
  a = 1.0 / 0.8; % outer radius (inner radius = 1)
  m = 0.1; % viscosity ratio
  zeta = 1;
@@ -25,7 +27,8 @@ for iRR = 1:length(ReiRei)
  Rei = ReiRei(iRR);
  Re = Rei / 0.8; % for paper II data
 
- taux = sysII(a, m, J, Rei, Ni, kk, thres);
+ taux = sysI(n, a, m, zeta, J, Rei, Ni, kk);
+% taux = sysII(a, m, J, Rei, Ni, kk, thres);
 
  GR = [kk' taux'];
  %%% reproducing Fig. 2 of paper I %%%
