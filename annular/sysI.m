@@ -43,10 +43,10 @@ ii = No + 1; %one = r(ii)
 [Wo, dWo] = baseFlowI(ro,a,m);
 [W, dW] = baseFlowI(r,a,m);
 [Wat1, dW2at1] = baseFlowI( 1.0, a, m);
-dWjump = 2.0*(1.0-m)/(a-(1.0-m)/a);
-dWzetaJump = 2.0*(1.0-m*zeta)/(a-(1.0-m)/a);
-d2Wi = -2.0 * m / (a - (1.0-m)/a);
-d2Wo = -2.0 / (a - (1.0-m)/a);
+dWjump = 2.0*(1.0-m)/(a*a-(1.0-m));
+dWzetaJump = 2.0*(1.0-m*zeta)/(a*a-(1.0-m));
+d2Wi = -2.0 * m / (a*a - (1.0-m));
+d2Wo = -2.0 / (a*a - (1.0-m));
 %%%%%%%%%%%%%%%%%%
 
 for ik = 1:length(kk)
@@ -232,7 +232,7 @@ for ik = 1:length(kk)
  omega = c * k;
  tau = imag(omega);
  tau = tau .* isfinite(tau);
- tau = tau .* (tau < 0.3);
+ tau = tau .* (tau < 1.3);
  [taux(ik), ip] = max(tau);
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %%% plotting eigenvectors: %%%
