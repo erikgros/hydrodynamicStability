@@ -30,14 +30,14 @@ for iRR = 1:length(ReiRei)
  taux = sysI(n, a, m, zeta, J, Rei, Ni, kk);
 % taux = sysII(a, m, J, Rei, Ni, kk, thres);
 
- GR = [kk' taux'];
- %%% reproducing Fig. 2 of paper I %%%
- figure(2);hold on
- plot(kk, taux,'x');xlabel('k');ylabel('Im(\omega)');
- title('growth rate');
- csvwrite('growRate.csv',GR)
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  if (Fall == 1)
+  GR = [kk' taux'];
+ %%% reproducing Fig. 2 of paper I %%%
+% figure(3);hold on
+% plot(kk, taux,'x');xlabel('k');ylabel('Im(\omega)');
+% title('growth rate');
+  csvwrite(['growRate' num2str(n) '.csv'],GR)
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   return
  end
  [tauMax, ikMax] = max(taux);
