@@ -1,4 +1,4 @@
-function [taux] = sysI(n, a, m, zeta, J, Rei, Ni, kk)
+function [taux, cx] = sysI(n, a, m, zeta, J, Rei, Ni, kk)
 % system I from "Lubricated pipelining: stability of core annular flow"
 Reo = (zeta / m) * Rei;
 Lo = (a - 1.0);
@@ -234,6 +234,7 @@ for ik = 1:length(kk)
  tau = tau .* isfinite(tau);
  tau = tau .* (tau < 1.3);
  [taux(ik), ip] = max(tau);
+ cx = c(ip);
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %%% plotting eigenvectors: %%%
  %lgth = size(eve,1) / 3;

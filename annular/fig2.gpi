@@ -2,7 +2,6 @@
 set xlabel "Re" offset 0,0
 set ylabel "max growth rate" offset 1,0
 set key right top
-set key box linestyle 1
 set grid
 set terminal png
 set datafile separator ","
