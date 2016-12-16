@@ -12,6 +12,7 @@ if (Fall == 1)
  ReiRei = [26.42];
  kk = [0.01:0.5:25];
 elseif (Fall == 2)
+ eta = 0.8;
  n = 0;
  a = 1.0 / 0.8; % outer radius (inner radius = 1)
  m = 0.1; % viscosity ratio
@@ -19,15 +20,25 @@ elseif (Fall == 2)
  J = 0.8*1000.0; % surface tension parameter
  ReiRei = 0.8 * [10:20:500];
  kk = [0.01:0.01:5];
+elseif (Fall == 8)
+% Fig 8 of paper II:
+ eta = 0.95;
+ n = 0;
+ a = 1.0 / eta; % outer radius (inner radius = 1)
+ m = 10.0; % viscosity ratio
+ zeta = 1.0;
+ J = eta * 100000.0; % surface tension parameter
+ ReiRei = 0.95 * [10:500:5000];
+ kk = [0.01:0.05:5];
 end
 
-Fig2sig = [];
-Fig2k = [];
+sigF = [];
+kF = [];
 for iRR = 1:length(ReiRei)
  Rei = ReiRei(iRR);
- Re = Rei / 0.8; % for paper II data
+ Re = Rei / eta; % for paper II data
 
- taux = sysI(n, a, m, zeta, J, Rei, Ni, kk);
+ [taux, ph] = sysI(n, a, m, zeta, J, Rei, Ni, kk);
 % taux = sysII(a, m, J, Rei, Ni, kk, thres);
 
  if (Fall == 1)
@@ -43,8 +54,8 @@ for iRR = 1:length(ReiRei)
  [tauMax, ikMax] = max(taux);
  kMax = kk(ikMax);
 %%% reproducing Fig. 2 of paper II %%%
- Fig2sig = [Fig2sig; [Re tauMax]];
- Fig2k = [Fig2k; [Re kMax]];
+ sigF = [sigF; [Re tauMax]];
+ kF = [kF; [Re kMax]];
  figure(1);hold on
  plot(Re,tauMax,'dbk')
  xlabel('Re');ylabel('\sigma_{max}');
@@ -53,5 +64,5 @@ for iRR = 1:length(ReiRei)
  xlabel('Re');ylabel('k_{max}');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
-csvwrite('sigFig2.csv',Fig2sig)
-csvwrite('kFig2.csv',Fig2k)
+csvwrite(['sigFig' num2str(Fall) '.csv'], sigF)
+csvwrite(['kFig' num2str(Fall) '.csv'], kF)
