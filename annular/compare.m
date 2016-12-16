@@ -1,7 +1,6 @@
 % comparing results with references
-Fall = 1
-Ni = 25; % number of points inner region
-thres = 0.3; % threshold above which eigenvalues are not considered
+Fall = 8
+Ni = 20; % number of points inner region
 
 if (Fall == 1)
  n = 0;
@@ -28,7 +27,8 @@ elseif (Fall == 8)
  m = 10.0; % viscosity ratio
  zeta = 1.0;
  J = eta * 100000.0; % surface tension parameter
- ReiRei = 0.95 * [10:500:5000];
+ ReiRei = eta * [10 20 40 90 180 360 720 1440];
+%               [10 80 200 800 2000 3500 5000];
  kk = [0.01:0.05:5];
 end
 
@@ -39,7 +39,7 @@ for iRR = 1:length(ReiRei)
  Re = Rei / eta; % for paper II data
 
  [taux, ph] = sysI(n, a, m, zeta, J, Rei, Ni, kk);
-% taux = sysII(a, m, J, Rei, Ni, kk, thres);
+% [taux, ph] = sysII(a, m, J, Rei, Ni, kk);
 
  if (Fall == 1)
   GR = [kk' taux'];

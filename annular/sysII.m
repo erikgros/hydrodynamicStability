@@ -1,8 +1,9 @@
-function [taux] = sysII(a, m, J, Rei, Ni, kk, MAXeva)
+function [taux, cx] = sysII(a, m, J, Rei, Ni, kk)
 % axisymetric system II from "Lubricated pipelining: stability of core annular flow"
 Reo = (1.0/m) * Rei;
 Lo = (a - 1.0);
 No = round( (a - 1.0) * Ni ); % number of points outer region
+No = Ni;%max(No, 3);
 addpath('../Chebyshev')
 
 %%% Matrices (inner region): %%%
@@ -104,19 +105,23 @@ for ik = 1:length(kk)
  A(ii-1, ii) -= (m - 1.0) * dW2at1;
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  [eve,eva] = eig(A,B); % solving A u = B c u
+%condA = cond(A)
+%condB = cond(B)
+
  c = diag(eva);
  omega = c * k;
 
  %%% filtering spurious eigenvalues: %%%
  tau = imag(omega);
  tau = tau .* isfinite(tau);
- tau = tau .* (tau < MAXeva);
+ tau = tau .* (tau < 1.3);
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  [taux(ik), ip] = max(tau);
  if (0)%(k<5) % taking second largest
   tau(ip) = -1000000;
   [taux(ik), ip] = max(tau);
  end
+ cx = c(ip);
  %%% plotting eigenvectors: %%%
 % for ip = 1:size( c )
 % u = eve(:,ip);

@@ -3,6 +3,7 @@ function [taux, cx] = sysI(n, a, m, zeta, J, Rei, Ni, kk)
 Reo = (zeta / m) * Rei;
 Lo = (a - 1.0);
 No = round( (a - 1.0) * Ni ); % number of inner points in outer region
+No = Ni;
 addpath('../Chebyshev')
 
 % we only impose the B.C. at r=a in all matrices
@@ -228,6 +229,8 @@ for ik = 1:length(kk)
 
  %%% solving A u = B c u: %%%
  [eve,eva] = eig(A,B);
+%condA = cond(A)
+%condB = cond(B)
  c = diag(eva);
  omega = c * k;
  tau = imag(omega);
