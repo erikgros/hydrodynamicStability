@@ -1,35 +1,42 @@
 % comparing results with references
-Fall = 8
-Ni = 20; % number of points inner region
+Fall = 11
+Ni = 10; % number of points inner region
 
+n = 0;
+zeta = 1.0;
 if (Fall == 1)
- n = 0;
+ eta = 100000000
  a = 1.43;
  m = 0.5;
- zeta = 1;
  J = 0;
  ReiRei = [26.42];
  kk = [0.01:0.5:25];
 elseif (Fall == 2)
  eta = 0.8;
- n = 0;
- a = 1.0 / 0.8; % outer radius (inner radius = 1)
+ a = 1.0 / eta; % outer radius (inner radius = 1)
  m = 0.1; % viscosity ratio
- zeta = 1;
- J = 0.8*1000.0; % surface tension parameter
- ReiRei = 0.8 * [10:20:500];
+ J = eta*1000.0; % surface tension parameter
+ ReiRei = eta * [10:20:500];
  kk = [0.01:0.01:5];
 elseif (Fall == 8)
 % Fig 8 of paper II:
  eta = 0.95;
- n = 0;
  a = 1.0 / eta; % outer radius (inner radius = 1)
  m = 10.0; % viscosity ratio
- zeta = 1.0;
  J = eta * 100000.0; % surface tension parameter
  ReiRei = eta * [10 20 40 90 180 360 720 1440];
 %               [10 80 200 800 2000 3500 5000];
  kk = [0.01:0.05:5];
+elseif (Fall == 11)
+%Fig 11 of paper II
+ eta = 0.2;
+ a = 1.0 / eta; % outer radius (inner radius = 1)
+ m = 0.1; % viscosity ratio
+ J = eta*1000.0; % surface tension parameter
+% m = 10.0; % viscosity ratio
+% J = eta*100000.0; % surface tension parameter
+ ReiRei = eta * [5 50 100 200 500];
+ kk = [0.01:0.01:1];
 end
 
 sigF = [];
@@ -59,6 +66,8 @@ for iRR = 1:length(ReiRei)
  figure(1);hold on
  plot(Re,tauMax,'dbk')
  xlabel('Re');ylabel('\sigma_{max}');
+set(gca,'xscale','log');
+set(gca,'yscale','log');
  figure(2);hold on
  plot(Re,kMax,'^bk');
  xlabel('Re');ylabel('k_{max}');
