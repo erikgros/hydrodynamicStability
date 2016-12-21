@@ -211,12 +211,12 @@ for ik = 1:length(kk)
  Avu(ii+1,1:ii) = m * n * D0o(ii,:);
  Avu(ii+1,ii+1:end) = -n * D0i(1,:);
  %%%%%%%%%%%%
- Aww(ii+1,1:ii) = -( J *(1.0 - k^2 - n^2) * D0o(ii,:) / (dWjump * Rei^2) + m * (1i/k) * (D2o(ii,:) + D1o(ii,:) - (k^2 + n^2) * D0o(ii,:)) + Wat1 * (zeta - dWzetaJump / dWjump) * D0o(ii,:) );
- Aww(ii+1,ii+1:end) = J *(1.0 - k^2 - n^2) * D0i(1,:) / (dWjump * Rei^2) + (1i/k) * (D2i(1,:) + D1i(1,:) - (k^2 + n^2) * D0i(1,:)) + Wat1 * (1.0 - dWzetaJump / dWjump) * D0i(1,:);
+ Aww(ii+1,1:ii) = -( J * (1.0 - k^2 - n^2) * D0o(ii,:) / (dWjump * Rei) + m * (1i/k) * (D2o(ii,:) + D1o(ii,:) - (k^2 + n^2) * D0o(ii,:)) + Wat1 * Rei * (zeta - dWzetaJump / dWjump) * D0o(ii,:) );
+ Aww(ii+1,ii+1:end) = J * (1.0 - k^2 - n^2) * D0i(1,:) / (dWjump * Rei) + (1i/k) * (D2i(1,:) + D1i(1,:) - (k^2 + n^2) * D0i(1,:)) + Wat1 * Rei * (1.0 - dWzetaJump / dWjump) * D0i(1,:);
  Awu(ii+1,1:ii) = -2i * m  * D1o(ii,:);
  Awu(ii+1,ii+1:end) = 2i * D1i(1,:);
- Bww(ii+1,1:ii) =   -(zeta - dWzetaJump / dWjump) * D0o(ii,:);
- Bww(ii+1,ii+1:end) = (1.0 - dWzetaJump / dWjump) * D0i(1,:);
+ Bww(ii+1,1:ii) =   -Rei * (zeta - dWzetaJump / dWjump) * D0o(ii,:);
+ Bww(ii+1,ii+1:end) = Rei * (1.0 - dWzetaJump / dWjump) * D0i(1,:);
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
  A = [ [Auu Auv Auw]; ...
@@ -235,16 +235,16 @@ for ik = 1:length(kk)
  omega = c * k;
  tau = imag(omega);
  tau = tau .* isfinite(tau);
- tau = tau .* (tau < 1.3);
+ tau = tau .* (tau < 4e7);
  [taux(ik), ip] = max(tau);
  cx = c(ip);
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %%% plotting eigenvectors: %%%
  %lgth = size(eve,1) / 3;
  %u = eve(1:lgth,ip);
- %u(ii) - u(ii+1)
+% zeroo=u(ii) - u(ii+1)
 % u = u([1:ii, ii+2:lgth]);
-% figure(1)
+% figure(4)
 % plot(r, u,'bk'); hold on; plot(r, W, 'r')
 % ylabel('w'); xlabel('r');legend('perturbation','base flow')
 % pause(1)
