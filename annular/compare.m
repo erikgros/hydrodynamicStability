@@ -1,6 +1,7 @@
 % comparing results with references
 Fall = 11
 Ni = 10; % number of points inner region
+No = Ni;
 
 n = 0;
 zeta = 1.0;
@@ -45,8 +46,8 @@ for iRR = 1:length(ReiRei)
  Rei = ReiRei(iRR);
  Re = Rei / eta; % for paper II data
 
- [taux, ph] = sysI(n, a, m, zeta, J, Rei, Ni, kk);
-% [taux, ph] = sysII(a, m, J, Rei, Ni, kk);
+ [taux, ph] = sysI(n, a, m, zeta, J, Rei, Ni, No, kk);
+% [taux, ph] = sysII(a, m, J, Rei, Ni, No, kk);
 
  if (Fall == 1)
   GR = [kk' taux'];

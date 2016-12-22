@@ -28,8 +28,9 @@ Rei = eta * Re;
 NiNi = [10 20 40 80 160 320]; % # points inner region
 for l = 1:length(NiNi)
  Ni = NiNi(l);
- [tau, c(l) ] = sysI(n, a, m, zeta, J, Rei, Ni, k);
-% [tau, c(l) ] = sysII(a, m, J, Rei, Ni, k); % n != 0
+ No = Ni;
+ [tau, c(l) ] = sysI(n, a, m, zeta, J, Rei, Ni, No, k);
+% [tau, c(l) ] = sysII(a, m, J, Rei, Ni, No, k); % n != 0
  c(l)
 end
 err = abs(c .- c(end));

@@ -1,9 +1,7 @@
-function [taux, cx] = sysII(a, m, J, Rei, Ni, kk)
+function [taux, cx] = sysII(a, m, J, Rei, Ni, No, kk)
 % axisymetric system II from "Lubricated pipelining: stability of core annular flow"
 Reo = (1.0/m) * Rei;
 Lo = (a - 1.0);
-No = round( (a - 1.0) * Ni ); % number of points outer region
-No = Ni;%max(No, 3);
 addpath('../Chebyshev')
 
 %%% Matrices (inner region): %%%

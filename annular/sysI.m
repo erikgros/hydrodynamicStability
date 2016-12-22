@@ -1,9 +1,7 @@
-function [taux, cx] = sysI(n, a, m, zeta, J, Rei, Ni, kk)
+function [taux, cx] = sysI(n, a, m, zeta, J, Rei, Ni, No, kk)
 % system I from "Lubricated pipelining: stability of core annular flow"
 Reo = (zeta / m) * Rei;
 Lo = (a - 1.0);
-No = round( (a - 1.0) * Ni ); % number of inner points in outer region
-No = Ni;
 addpath('../Chebyshev')
 
 % we only impose the B.C. at r=a in all matrices
