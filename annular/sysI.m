@@ -43,7 +43,7 @@ ii = No + 1; %one = r(ii)
 [W, dW] = baseFlowI(r,a,m);
 [Wat1, dW2at1] = baseFlowI( 1.0, a, m);
 dWjump = 2.0*(1.0-m)/(a*a-(1.0-m));
-dWzetaJump = 2.0*(1.0-m*zeta)/(a*a-(1.0-m));
+dWzetaJump = 2.0*(zeta-m)/(a*a-(1.0-m));
 d2Wi = -2.0 * m / (a*a - (1.0-m));
 d2Wo = -2.0 / (a*a - (1.0-m));
 %%%%%%%%%%%%%%%%%%
