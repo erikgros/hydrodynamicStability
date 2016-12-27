@@ -1,5 +1,7 @@
 function [taux, cx] = sysI(n, a, m, zeta, J, Rei, Ni, No, kk)
 % system I from "Lubricated pipelining: stability of core annular flow"
+Gal = 0;
+fke = -1;
 Reo = (zeta / m) * Rei;
 Lo = (a - 1.0);
 addpath('../Chebyshev')
@@ -129,17 +131,15 @@ for ik = 1:length(kk)
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %%% B.C. at r = 0 %%%
  if(n==0)
- Auu(end,:) = 0;Auu(end,end) = 1;
+ Auu(end,:) = 0;
  Auv(end,:) = 0;
  Auw(end,:) = 0;
  Avu(end,:) = 0;
- Avv(end,:) = 0;Avv(end,end) = 1;
+ Avv(end,:) = 0;
  Avw(end,:) = 0;
  Awu(end,:) = 0;
  Awv(end,:) = 0;
- Aww(end,:) = 0;Aww(end,end) = k;
- Awu(end,end-size(D1i,2)+1:end) = 2.0 * D1i(end,:);
-
+ Aww(end,:) = 0;
  Buu(end,:) = 0;
  Buv(end,:) = 0;
  Buw(end,:) = 0;
@@ -149,6 +149,18 @@ for ik = 1:length(kk)
  Bwu(end,:) = 0;
  Bwv(end,:) = 0;
  Bww(end,:) = 0;
+ if (Gal)
+  Buu(end,end) = 1;
+  Bvv(end,end) = 1;
+  Bww(end,end) = k;
+  Bwu(end,end-size(D1i,2)+1:end) = 2.0 * D1i(end,:);
+ else
+  fke = 1;
+ end
+ Auu(end,end) = fke;
+ Avv(end,end) = fke;
+ Aww(end,end) = k*fke;
+ Awu(end,end-size(D1i,2)+1:end) = 2.0 * fke*D1i(end,:);
  elseif (n == 1)
  return
  end
@@ -172,8 +184,14 @@ for ik = 1:length(kk)
  Bwu(ii,:) = 0;
  Bwv(ii,:) = 0;
  Bww(ii,:) = 0;
- Auu(ii,ii) = 1;Auu(ii,ii+1) = -1;
- Avv(ii,ii) = 1;Avv(ii,ii+1) = -1;
+ if (Gal)
+  Buu(ii,ii) = 1;Buu(ii,ii+1) = -1;
+  Bvv(ii,ii) = 1;Bvv(ii,ii+1) = -1;
+ else
+  fke =1 ;
+ end
+ Auu(ii,ii) = fke;Auu(ii,ii+1) = -fke;
+ Avv(ii,ii) = fke;Avv(ii,ii+1) = -fke;
  Awu(ii,ii) = dWjump;
  Aww(ii,ii) = -Wat1 * k;Aww(ii,ii+1) = Wat1 * k;
  Bww(ii,ii) = -k;Bww(ii,ii+1) = k;
@@ -198,16 +216,30 @@ for ik = 1:length(kk)
  Bwv(ii+1,:) = 0;
  Bww(ii+1,:) = 0;
  %% (5.9) %%
- Auw(ii+1,1:ii) = -m * D1o(ii,:);
- Auw(ii+1,ii+1:end) = D1i(1,:);
- Auu(ii+1,1:ii) = m * k * D0o(ii,:);
- Auu(ii+1,ii+1:end) = -k * D0i(1,:);
+ if (Gal)
+  Buw(ii+1,1:ii) = -m * D1o(ii,:);
+  Buw(ii+1,ii+1:end) = D1i(1,:);
+  Buu(ii+1,1:ii) = m * k * D0o(ii,:);
+  Buu(ii+1,ii+1:end) = -k * D0i(1,:);
+ end
+ Auw(ii+1,1:ii) = -m * fke*D1o(ii,:);
+ Auw(ii+1,ii+1:end) = fke*D1i(1,:);
+ Auu(ii+1,1:ii) = m * k *fke* D0o(ii,:);
+ Auu(ii+1,ii+1:end) = -k *fke* D0i(1,:);
+
  %%%%%%%%%%%
  %% (5.10) %%
- Avv(ii+1,1:ii) = -m * (D1o(ii,:) - D0o(ii,:));
- Avv(ii+1,ii+1:end) = D1i(1,:) - D0i(1,:);
- Avu(ii+1,1:ii) = m * n * D0o(ii,:);
- Avu(ii+1,ii+1:end) = -n * D0i(1,:);
+ if (Gal)
+  Bvv(ii+1,1:ii) = -m * (D1o(ii,:) - D0o(ii,:));
+  Bvv(ii+1,ii+1:end) = D1i(1,:) - D0i(1,:);
+  Bvu(ii+1,1:ii) = m * n * D0o(ii,:);
+  Bvu(ii+1,ii+1:end) = -n * D0i(1,:);
+ end
+
+ Avv(ii+1,1:ii) = -m *fke* (D1o(ii,:) - D0o(ii,:));
+ Avv(ii+1,ii+1:end) = fke*D1i(1,:) - D0i(1,:);
+ Avu(ii+1,1:ii) = m * n *fke* D0o(ii,:);
+ Avu(ii+1,ii+1:end) = -n *fke* D0i(1,:);
  %%%%%%%%%%%%
  Aww(ii+1,1:ii) = -( J * (1.0 - k^2 - n^2) * D0o(ii,:) / (dWjump * Rei) + m * (1i/k) * (D2o(ii,:) + D1o(ii,:) - (k^2 + n^2) * D0o(ii,:)) + Wat1 * Rei * (zeta - dWzetaJump / dWjump) * D0o(ii,:) );
  Aww(ii+1,ii+1:end) = J * (1.0 - k^2 - n^2) * D0i(1,:) / (dWjump * Rei) + (1i/k) * (D2i(1,:) + D1i(1,:) - (k^2 + n^2) * D0i(1,:)) + Wat1 * Rei * (1.0 - dWzetaJump / dWjump) * D0i(1,:);
