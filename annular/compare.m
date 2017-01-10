@@ -1,5 +1,5 @@
 % comparing results with references
-Fall = 11
+Fall = 2
 Ni = 10; % number of points inner region
 No = Ni;
 
@@ -18,15 +18,16 @@ elseif (Fall == 2)
  m = 0.1; % viscosity ratio
  J = eta*1000.0; % surface tension parameter
  ReiRei = eta * [10:20:500];
- kk = [0.01:0.01:5];
+ kk = [0.01:0.01:3];
+ Ni = 20;
+ No = 30;
 elseif (Fall == 8)
 % Fig 8 of paper II:
  eta = 0.95;
  a = 1.0 / eta; % outer radius (inner radius = 1)
  m = 10.0; % viscosity ratio
  J = eta * 100000.0; % surface tension parameter
- ReiRei = eta * [10 20 40 90 180 360 720 1440];
-%               [10 80 200 800 2000 3500 5000];
+ ReiRei = eta * [10 80 200 800 2000 3500 5000];
  kk = [0.01:0.05:5];
 elseif (Fall == 11)
 %Fig 11 of paper II

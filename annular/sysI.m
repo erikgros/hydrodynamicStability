@@ -265,7 +265,7 @@ for ik = 1:length(kk)
  omega = c * k;
  tau = imag(omega);
  tau = tau .* isfinite(tau);
- tau = tau .* (tau < 4e7);
+ tau = tau .* (tau < 0.3);
  [taux(ik), ip] = max(tau);
  cx = c(ip);
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
