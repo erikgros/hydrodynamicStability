@@ -33,8 +33,10 @@ for iRR = 1:length(ReiRei)
  end
  kkk( iRR ) = k;
 end
-
 Re = ReiRei / eta; % for paper II data
+arr = [kkk' Re'];
+csvwrite(['eta' num2str(100*eta) '.csv'], arr)
+return
 figure(1);hold on
 semilogy(kkk, Re)
 xlabel('k');ylabel('Re');
