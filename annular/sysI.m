@@ -3,6 +3,7 @@ function [taux, cx] = sysI(n, a, m, zeta, J, Rei, Ni, No, kk)
 Gal = 0;
 fke = -1;
 Reo = (zeta / m) * Rei;
+Re = Rei * a; % to compare with paper II
 Lo = (a - 1.0);
 addpath('../Chebyshev')
 
@@ -269,11 +270,65 @@ for ik = 1:length(kk)
  [taux(ik), ip] = max(tau);
  cx = c(ip);
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
- %%% plotting eigenvectors: %%%
- %lgth = size(eve,1) / 3;
- %u = eve(1:lgth,ip);
+ %%% computing energy terms: %%%
+ lgt = size(eve,1) / 3;
+ u = eve(1:lgt,ip);
+ v = eve(lgt+1:2*lgt,ip);
+ w = eve(2*lgt+1:3*lgt,ip);
+ if ( length( kk ) == 1 ) % computing energy
+  msqu = u .* conj( u );
+  msqv = v .* conj( v );
+  msqw = w .* conj( w );
+  %% D: %%
+  D = ( msqu(end) + msqv( end ) ) / Rei;
+  for l = 1:2
+   if l == 1
+    D1l = D1i;
+    rl = ri;
+    il = [ii+1:lgt];
+    Rel = Rei;
+   else
+    D1l = D1o;
+    rl = ro;
+    il = [1:ii];
+    Rel = Reo;
+   end
+   f = zeros(length(rl),1);
+   cont = D1l * (rl .* u(il));
+   cont = cont .* conj( cont );
+   f += cont ./ rl;
+   cont = D1l * (rl .* v(il));
+   cont = cont .* conj( cont );
+   f += cont ./ rl;
+   cont = D1l * w(il);
+   cont = cont .* conj( cont );
+   f += cont .* rl;
+   cont = ( rl * k^2 + rl.^(-1) * n^2 ) .* ( msqu(il) + msqv(il) + msqw(il) );
+   f += cont;
+   cont = real( u(il) .* conj( v(il) ) );
+   f += 4 * n * cont ./ rl;
+   Dl = integ( f, rl ) / Rel;
+   D += Dl;
+  end
+  %%%%%%%%
+  %% I; %%
+  f = dWi .* imag( u([ii+1:lgt]) .* conj( w([ii+1:lgt]) ) ) .* ri;
+  Ii = integ( f, ri ) / D;
+  f = dWo .* imag( u([1:ii]) .* conj( w([1:ii]) ) ) .* ro;
+  Io = integ( f, ro ) / D;
+  I = Ii + Io;
+  figure(1);hold on
+  plot( Re, I-1,'+r' )
+  ylabel('I-1'); xlabel('Re')
+  figure(2);hold on
+  plot( Re, Ii );plot( Re, Io,'r' )
+  ylabel('I'); xlabel('Re'); legend("1","2")
+  %%%%%%%%
+ end
 % zeroo=u(ii) - u(ii+1)
-% u = u([1:ii, ii+2:lgth]);
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ %%% plotting eigenvectors: %%%
+% u = u([1:ii, ii+2:lgt]);
 % figure(4)
 % plot(r, u,'bk'); hold on; plot(r, W, 'r')
 % ylabel('w'); xlabel('r');legend('perturbation','base flow')
