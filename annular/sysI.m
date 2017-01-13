@@ -271,11 +271,12 @@ for ik = 1:length(kk)
  cx = c(ip);
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %%% computing energy terms: %%%
+ % my D, I, B are u^2 times those of paper II %
  lgt = size(eve,1) / 3;
  u = eve(1:lgt,ip);
  v = eve(lgt+1:2*lgt,ip);
  w = eve(2*lgt+1:3*lgt,ip);
- if ( length( kk ) == 1 ) % computing energy
+ if ( length( kk ) == 1 ) % computing energy only when kk = kmax
   msqu = u .* conj( u );
   msqv = v .* conj( v );
   msqw = w .* conj( w );
@@ -286,12 +287,12 @@ for ik = 1:length(kk)
     D1l = D1i;
     rl = ri;
     il = [ii+1:lgt];
-    Rel = Rei;
+    ml = 1;
    else
     D1l = D1o;
     rl = ro;
     il = [1:ii];
-    Rel = Reo;
+    ml = m;
    end
    f = zeros(length(rl),1);
    cont = D1l * (rl .* u(il));
@@ -307,28 +308,57 @@ for ik = 1:length(kk)
    f += cont;
    cont = real( u(il) .* conj( v(il) ) );
    f += 4 * n * cont ./ rl;
-   Dl = integ( f, rl ) / Rel;
-   D += Dl;
+   Dl = integ( f, rl );
+   D += ml * Dl;
   end
+  D = D / Re;
   %%%%%%%%
   %% I; %%
   f = dWi .* imag( u([ii+1:lgt]) .* conj( w([ii+1:lgt]) ) ) .* ri;
   Ii = integ( f, ri ) / D;
+  Ii = Ii / a;
   f = dWo .* imag( u([1:ii]) .* conj( w([1:ii]) ) ) .* ro;
-  Io = integ( f, ro ) / D;
+  Io = zeta * integ( f, ro ) / D;
+  Io = Io / a;
   I = Ii + Io;
   figure(1);hold on
-  plot( Re, I-1,'+r' )
-  ylabel('I-1'); xlabel('Re')
+  plot( Re, I-1, 'x' );
+  ylabel('Energy');xlabel('Re')
   figure(2);hold on
-  plot( Re, Ii );plot( Re, Io,'r' )
+  plot( Re, Ii, 'r' );plot( Re, Io, 'x' )
   ylabel('I'); xlabel('Re'); legend("1","2")
   %%%%%%%%
+  %% B1: %%
+  dd = W(ii) - cx;
+  dd = dd * conj( dd );
+  B1 = imag(cx) * a * J * (1.0 - k^2 - n^2) * msqu(ii) / (k * dd * Re^2);
+  B1 = B1 / D;
+  figure(1);hold on
+  plot( Re, B1, 'd' )
+  %%%%%%%%%
+  %% B2: %%
+  % using:
+  % B2 = { ( u u* + v v* ) [m] - u* [m u'] + v* [m v'] + [m w* w'] } / Re
+  % instead of (5.6)
+  dui = D1i * u([ii+1:lgt]);
+  dvi = D1i * v([ii+1:lgt]);
+  dwi = D1i * w([ii+1:lgt]);
+  duo = D1o * u([1:ii]);
+  dvo = D1o * v([1:ii]);
+  dwo = D1o * w([1:ii]);
+  B2 = ( msqu(ii) + msqv(ii) ) * (1 - m) ...
+   - conj( u(ii) ) * ( dui( 1 ) - m * duo( end ) ) ...
+   + conj( v(ii) ) * ( dvi( 1 ) - m * dvo( end ) ) ...
+   +  conj( w(ii+1) ) * dwi( 1 ) - m * conj( w(ii) ) * dwo( end ) ;
+  B2 = B2 / ( D * Re );
+  plot( Re, B2, '^' )
+  legend("I-1","B1","B2")
+  %%%%%%%%%
  end
-% zeroo=u(ii) - u(ii+1)
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- %%% plotting eigenvectors: %%%
+% zeroo=u(ii) - u(ii+1)
 % u = u([1:ii, ii+2:lgt]);
+ %%% plotting eigenvectors: %%%
 % figure(4)
 % plot(r, u,'bk'); hold on; plot(r, W, 'r')
 % ylabel('w'); xlabel('r');legend('perturbation','base flow')
