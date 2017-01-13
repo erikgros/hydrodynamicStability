@@ -1,4 +1,4 @@
-function [taux, cx] = sysI(n, a, m, zeta, J, Rei, Ni, No, kk)
+function [taux, cx, energy] = sysI(n, a, m, zeta, J, Rei, Ni, No, kk)
 % system I from "Lubricated pipelining: stability of core annular flow"
 Gal = 0;
 fke = -1;
@@ -271,7 +271,6 @@ for ik = 1:length(kk)
  cx = c(ip);
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %%% computing energy terms: %%%
- % my D, I, B are u^2 times those of paper II %
  lgt = size(eve,1) / 3;
  u = eve(1:lgt,ip);
  v = eve(lgt+1:2*lgt,ip);
@@ -354,6 +353,7 @@ for ik = 1:length(kk)
   plot( Re, B2, '^' )
   legend("I-1","B1","B2")
   %%%%%%%%%
+  energy = [Re I B1 B2];
  end
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % zeroo=u(ii) - u(ii+1)

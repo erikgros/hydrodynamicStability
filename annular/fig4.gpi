@@ -1,0 +1,16 @@
+# comparing with data of Fig4 in "Lubricated pipelining: stability of core annular flow II"
+set xlabel "Re" offset 0,0
+set ylabel "energy" offset 1,0
+set key center bottom
+set xrange [0:500]
+set terminal png
+set datafile separator ","
+set output "Fig4.png"
+#--------------------------------------------------
+
+plot "./fig4b.csv" using 1:2 w l linecolor rgb "black" title "reference", \
+     "./fig4b.csv" using 1:3 w l linecolor rgb "black" notitle, \
+     "./fig4b.csv" using 1:4 w l linecolor rgb "black" notitle, \
+     "./energy.csv" using 1:($2-1) w p pt 2 title "I-D", \
+     "./energy.csv" using 1:3 w p pt 13 title "B1", \
+     "./energy.csv" using 1:4 w p pt 9 title "B2"
