@@ -1,5 +1,6 @@
 function [taux, cx, energy] = sysI(n, a, m, zeta, J, Rei, Ni, No, kk)
 % system I from "Lubricated pipelining: stability of core annular flow"
+plotE = 0;
 Gal = 0;
 fke = -1;
 Reo = (zeta / m) * Rei;
@@ -275,7 +276,7 @@ for ik = 1:length(kk)
  u = eve(1:lgt,ip);
  v = eve(lgt+1:2*lgt,ip);
  w = eve(2*lgt+1:3*lgt,ip);
- if ( length( kk ) == 1 ) % computing energy only when kk = kmax
+ if ( plotE == 1 )
   msqu = u .* conj( u );
   msqv = v .* conj( v );
   msqw = w .* conj( w );
@@ -320,24 +321,16 @@ for ik = 1:length(kk)
   Io = zeta * integ( f, ro ) / D;
   Io = Io / a;
   I = Ii + Io;
-  figure(1);hold on
-  plot( Re, I-1, 'x' );
-  ylabel('Energy');xlabel('Re')
-  figure(2);hold on
-  plot( Re, Ii, 'r' );plot( Re, Io, 'x' )
-  ylabel('I'); xlabel('Re'); legend("1","2")
   %%%%%%%%
   %% B1: %%
   dd = W(ii) - cx;
   dd = dd * conj( dd );
   B1 = imag(cx) * a * J * (1.0 - k^2 - n^2) * msqu(ii) / (k * dd * Re^2);
   B1 = B1 / D;
-  figure(1);hold on
-  plot( Re, B1, 'd' )
   %%%%%%%%%
   %% B2: %%
   % using:
-  % B2 = { ( u u* + v v* ) [m] - u* [m u'] + v* [m v'] + [m w* w'] } / Re
+  % B2 = real{ ( u u* + v v* ) [m] - u* [m u'] + v* [m v'] + [m w* w'] } / Re
   % instead of (5.6)
   dui = D1i * u([ii+1:lgt]);
   dvi = D1i * v([ii+1:lgt]);
@@ -349,11 +342,17 @@ for ik = 1:length(kk)
    - conj( u(ii) ) * ( dui( 1 ) - m * duo( end ) ) ...
    + conj( v(ii) ) * ( dvi( 1 ) - m * dvo( end ) ) ...
    +  conj( w(ii+1) ) * dwi( 1 ) - m * conj( w(ii) ) * dwo( end ) ;
-  B2 = B2 / ( D * Re );
-  plot( Re, B2, '^' )
-  legend("I-1","B1","B2")
+  B2 = real(B2) / ( D * Re );
   %%%%%%%%%
   energy = [Re I B1 B2];
+
+  figure(1);hold on
+  plot( Re, I-1, 'x' ); plot( Re, B1, 'd' ); plot( Re, B2, '^' )
+  legend("I-1","B1","B2")
+  ylabel('Energy'); xlabel('Re')
+  figure(2);hold on
+  plot( Re, Ii, 'r' ); plot( Re, Io, 'x' )
+  ylabel('I'); xlabel('Re'); legend("1","2")
  end
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % zeroo=u(ii) - u(ii+1)
